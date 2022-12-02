@@ -1,22 +1,35 @@
-{-
-ghci> day1 <- readFile "data/day1"
-ghci> day1_lines = lines day1
-ghci> grouped = splitWhen ((== 0) . length) day1_lines
-ghci> int_grouped = map (map read) grouped :: [[Integer]]
-
-ghci> :{
-ghci|   max' [] n = n
-ghci|   max' (x:xs) n | x > n = max' xs x
-ghci|   max' (x:xs) n = max' xs n
-ghci| :}
-ghci> max' (map sum int_grouped) 0
-
--}
 module Day1
   ( part1
+  , part2
   ) where
 
 import           Data.List.Split (splitWhen)
+import           Data.Sort       (sort)
 
-part1 :: String -> String
-part1 file = "100"
+-- A simple max function
+myMax :: [Integer] -> Integer
+myMax vals = max' vals 0
+  where
+    max' [] n = n
+    max' (x:xs) n
+      | x > n = max' xs x
+    max' (x:xs) n = max' xs n
+
+-- Part1 Solution.
+part1 :: String -> IO Integer
+part1 file = do
+  raw <- readFile file
+  let grouped = splitWhen ((== 0) . length) $ lines raw
+      intGrouped = map (map read) grouped
+      maxCalories = myMax (map sum intGrouped)
+  return maxCalories
+
+-- Part2 Solution.
+part2 :: String -> IO Integer
+part2 file = do
+  raw <- readFile file
+  let grouped = splitWhen ((== 0) . length) $ lines raw
+      intGrouped = map (map read) grouped
+      sortedCalories = sort $ map sum intGrouped
+      maxCalories = sum $ take 3 $ reverse sortedCalories
+  return maxCalories

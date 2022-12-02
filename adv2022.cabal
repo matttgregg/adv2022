@@ -49,7 +49,10 @@ extra-source-files: CHANGELOG.md
 
 library
     -- Modules exported by the library.
-    exposed-modules:  MyLib
+    exposed-modules:  
+        MyLib, 
+        Day1,
+        Day2
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -58,7 +61,7 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.16.4.0, split
+    build-depends:    base ==4.16.3.0, split, sort
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -78,7 +81,7 @@ executable adv2022
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base ^>=4.16.4.0,
+        base ==4.16.3.0,
         adv2022
 
     -- Directories containing source files.
@@ -101,4 +104,4 @@ test-suite adv2022-test
     main-is:          MyLibTest.hs
 
     -- Test dependencies.
-    build-depends:    base ^>=4.16.4.0
+    build-depends:    base ==4.16.3.0
