@@ -68,13 +68,7 @@ scoreResponseFromString game = scoreGame theirs mine
     mine = responseTo theirs m
 
 part1 :: String -> IO Int
-part1 file = do
-  raw <- readFile file
-  let scores = sum . map scoreFromString $ lines raw
-  return scores
+part1 = ((sum . map scoreFromString . lines) <$>) . readFile
 
 part2 :: String -> IO Int
-part2 file = do
-  raw <- readFile file
-  let scores = sum . map scoreResponseFromString $ lines raw
-  return scores
+part2 = ((sum . map scoreResponseFromString . lines) <$>) . readFile

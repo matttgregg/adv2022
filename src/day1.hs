@@ -7,7 +7,7 @@ import           Data.List.Split (splitWhen)
 import           Data.Sort       (sort)
 
 -- A simple max function
-myMax :: [Integer] -> Integer
+myMax :: [Int] -> Int
 myMax vals = max' vals 0
   where
     max' [] n = n
@@ -16,20 +16,17 @@ myMax vals = max' vals 0
     max' (x:xs) n = max' xs n
 
 -- Part1 Solution.
-part1 :: String -> IO Integer
-part1 file = do
-  raw <- readFile file
-  let grouped = splitWhen ((== 0) . length) $ lines raw
-      intGrouped = map (map read) grouped
-      maxCalories = myMax (map sum intGrouped)
-  return maxCalories
+part1 :: String -> IO Int
+part1 = (findMaxCalories <$>) . readFile
+  where
+    findMaxCalories =
+      myMax . map sum . map (map read) . splitWhen ((== 0) . length) . lines
 
 -- Part2 Solution.
-part2 :: String -> IO Integer
-part2 file = do
-  raw <- readFile file
-  let grouped = splitWhen ((== 0) . length) $ lines raw
-      intGrouped = map (map read) grouped
-      sortedCalories = sort $ map sum intGrouped
-      maxCalories = sum $ take 3 $ reverse sortedCalories
-  return maxCalories
+part2 :: String -> IO Int
+part2 = (findMaxThree <$>) . readFile
+  where
+    findMaxThree =
+      sum .
+      take 3 .
+      reverse . map sum . map (map read) . splitWhen ((== 0) . length) . lines
