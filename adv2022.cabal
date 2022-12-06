@@ -53,7 +53,9 @@ library
         Day1,
         Day2,
         Day3,
-        Day4
+        Day4,
+        Day5,
+        Day6
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -69,7 +71,9 @@ library
         megaparsec, 
         text, 
         unordered-containers,
-        ilist
+        ilist,
+        array,
+        bytestring
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -90,7 +94,15 @@ executable adv2022
     -- Other library packages from which modules are imported.
     build-depends:
         base ^>=4.16.4.0,
-        adv2022
+        adv2022,
+        split, 
+        sort, 
+        megaparsec, 
+        text, 
+        unordered-containers,
+        ilist,
+        array,
+        bytestring
 
     -- Directories containing source files.
     hs-source-dirs:   app

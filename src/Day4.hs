@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Day4 where
 
 import qualified Data.Text            as T (Text)
@@ -39,19 +37,19 @@ takeRight (Left _)  = undefined
 takeRight (Right x) = x
 
 containedPair [(from1, to1), (from2, to2)] =
-  (from1 >= from2 && to1 <= to2) || (from2 >= from1 && to2 <= to1)
+  from1 >= from2 && to1 <= to2 || from2 >= from1 && to2 <= to1
 
 containingPairs = map containedPair
 
 intersectingPair [(from1, to1), (from2, to2)] =
-  (from1 >= from2 && from1 <= to2) || (from2 >= from1 && from2 <= to1)
+  from1 >= from2 && from1 <= to2 || from2 >= from1 && from2 <= to1
 
 part1 fName =
-  length . filter id <$> containingPairs <$> takeRight <$>
+  ((length . filter id) . containingPairs <$> takeRight) .
   parse fileRanges fName <$>
   TIO.readFile fName
 
 part2 fName =
-  length . filter id <$> map intersectingPair <$> takeRight <$>
+  ((length . filter id) . map intersectingPair <$> takeRight) .
   parse fileRanges fName <$>
   TIO.readFile fName
