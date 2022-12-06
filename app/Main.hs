@@ -24,7 +24,7 @@ runTextDay ::
 runTextDay day file p1 p2 = do
   part1 <- p1 file
   part2 <- p2 file
-  printf $ concat ["Day", show day, ": ", part1, ", ", part2, "\n"]
+  printf $ concat ["Day", show day, " : ", part1, ", ", part2, "\n"]
 
 main :: IO ()
 main = do
