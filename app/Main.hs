@@ -30,11 +30,11 @@ runTextDay day file p1 p2 = do
 
 main :: IO ()
 main = do
-  runDay 1 "data/day1" Day1.part1 Day1.part2
-  runDay 2 "data/day2" Day2.part1 Day2.part2
-  runDay 3 "data/day3" Day3.part1 Day3.part2
-  runDay 4 "data/day4" Day4.part1 Day4.part2
-  runTextDay 5 "data/day5" Day5.part1 Day5.part2
-  runDay 6 "data/day6" Day6.part1 Day6.part2
-  runDay 7 "data/day7" Day7.part1 Day7.part2
-  runDay 8 "data/day8" Day8.part1 Day8.part2
+  runDay 1 "data/full/day1" Day1.part1 Day1.part2
+  runDay 2 "data/full/day2" Day2.part1 Day2.part2
+  runDay 3 "data/full/day3" Day3.part1 Day3.part2
+  runDay 4 "data/full/day4" Day4.part1 Day4.part2
+  runTextDay 5 "data/full/day5" Day5.part1 Day5.part2
+  runDay 6 "data/full/day6" Day6.part1 Day6.part2
+  runDay 7 "data/full/day7" Day7.part1 Day7.part2
+  runDay 8 "data/full/day8" Day8.part1 Day8.part2

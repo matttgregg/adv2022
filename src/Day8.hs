@@ -70,6 +70,7 @@ scoreView i cs = length (takeWhile (< i) cs) + adjust
         then 1
         else 0
 
+scoreFor :: (Int, Int) -> Forest -> Int
 scoreFor (row, col) (Forest f) =
   let views = viewsFor row col (Forest f)
       val = f !! row !! col

@@ -17,7 +17,7 @@ priority = priority' . ord
 compartmentalise :: [Char] -> ([Char], [Char])
 compartmentalise x = splitAt (compartmentSize x) x
   where
-    compartmentSize = flip div 2 . length
+    compartmentSize = (`div` 2) . length
 
 inBoth :: [Char] -> [Char]
 inBoth = nub . uncurry intersect . compartmentalise
@@ -38,5 +38,4 @@ part1 :: String -> IO Int
 part1 = ((sum . map costInBoth . lines) <$>) . readFile
 
 part2 :: String -> IO Int
-part2 =
-  ((sum . map priority . map badgeItem . elfGroups . lines) <$>) . readFile
+part2 = ((sum . map (priority . badgeItem) . elfGroups . lines) <$>) . readFile
