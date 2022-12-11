@@ -3,8 +3,9 @@
 module Main where
 
 import qualified Data.Text    as T
-import qualified Data.Text.IO as T.IO
+import qualified Data.Text.IO as TIO
 import qualified Day1
+import qualified Day10
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -13,7 +14,6 @@ import qualified Day6
 import qualified Day7
 import qualified Day8
 import qualified Day9
-import qualified Text.Printf  as TIO
 import           Text.Printf
 
 runDay :: Int -> String -> (String -> IO Int) -> (String -> IO Int) -> IO ()
@@ -40,3 +40,7 @@ main = do
   runDay 7 "data/full/day7" Day7.part1 Day7.part2
   runDay 8 "data/full/day8" Day8.part1 Day8.part2
   runDay 9 "data/full/day9" Day9.part1 Day9.part2
+  part10_1 <- Day10.part1 "data/full/day10"
+  printf $ "Day10 Part1:" <> show part10_1 <> "\n"
+  TIO.putStrLn "Day10 Part2:"
+  Day10.part2 "data/full/day10"

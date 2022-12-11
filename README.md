@@ -129,3 +129,18 @@ relatively straight forward refactor and I accomplished it first time without er
 was an area I felt the Haskell type system helping me. As I refactored, the type system 
 helped guide the right way to rewrite the functions. Very nice, well done Haskell.
 
+## Day 10
+
+The first one where there's felt a significant shift between part 1 and part 2 today.
+
+For part 1, it is, as usual, _don't lose your head_ . Keep careful track of the things
+that you need to keep track of, and everything is fine, nothing too weird.
+
+For part 2 - I love these visualisation type problems. There are usually a few and 
+they are extremely satisfying to get done. Again, nothing too complicated going on,
+but a lot of opportunities to fall foul of off-by-one errors. For example, I initially
+missed that the scan positions are zero indexed. This is one of those situations where
+interactive development helps immensely - you can simply test each of your parts in 
+isolation and gain confidence in how they all fit together.
+
+
