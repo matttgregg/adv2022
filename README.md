@@ -143,4 +143,26 @@ missed that the scan positions are zero indexed. This is one of those situations
 interactive development helps immensely - you can simply test each of your parts in 
 isolation and gain confidence in how they all fit together.
 
+## Day 11
+
+This was fun, and also quite long - mainly because I tend to be quite slow and
+deliberate about these things. So, I spent quite a long time encoding the parsing 
+and the throwing operations.
+
+Again, one minor transcription error but easy to catch with interactive investigation.
+
+And then part 2 - wasn't too bad. It is the first day where we have the _you need some cunning trick to keep this big calculation manageable_ - but here, you don't have to be **that** cunning.
+Avoiding spoilers, it's some very basic modular arithmatic, which is roughly the level
+of maths that Eric often likes to throw in.
+
+So again, the work for part 2 was identify a strategy, and refactor to make it easy to 
+insert the strategy that differentiates part one and two. Also, this was the first
+day that things have started to get big enough that I've worried abour large 
+type signatures - e.g. `Int -> Int -> Int -> Int` or similar. How to differentiate 
+those `Int`s? In todays case, some of those bare args became something a bit more complex
+and so this resolved itself. But I am interested to understand how seasoned Haskellers avoid
+this sort of problem. A couple of shout outs to nice things that I've noticed:
+
+ * Switching between types hasn't been as painful as I at first thought. As long as you keep things straight in your head, the explicit conversions are fairly natural.
+ * GHC seems fairly efficient. I mention because today I could see that running my solution today in GHCI was noticably slower than in GHC. But, that's still ~a second vs ~100ms in ghc. Although the code that I wrote wasn't that efficient, it's still well within practical requirements without heavy tweaks. I have previously worried about Haskell performance without extreme tuning, but in practice it hasn't been that difficult. Sensible and idiomatic choices seem to get you a long way.
 

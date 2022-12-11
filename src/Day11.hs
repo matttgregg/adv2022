@@ -21,16 +21,24 @@ data Monkey =
     }
   deriving (Show)
 
+data Relief
+  = DIV3
+  | MODX Integer
+
 data MOp
   = MAdd Integer
   | MMult Integer
   | MSquare
   deriving (Show)
 
-mworry :: MOp -> Integer -> Integer -> Integer
-mworry (MAdd x) v relief  = (x + v) `div` relief
-mworry (MMult x) v relief = (x * v) `div` relief
-mworry MSquare v relief   = (v * v) `div` relief
+doRelief :: Relief -> Integer -> Integer
+doRelief DIV3 x     = x `div` 3
+doRelief (MODX v) x = x `mod` v
+
+mworry :: MOp -> Integer -> Relief -> Integer
+mworry (MAdd x) v relief  = doRelief relief (x + v)
+mworry (MMult x) v relief = doRelief relief (x * v)
+mworry MSquare v relief   = doRelief relief (v * v)
 
 newtype MTest =
   MDivisible Integer
@@ -131,10 +139,10 @@ newtype MonkArray =
   deriving (Show)
 
 -- Shift a single item
-shiftOne :: Integer -> MonkArray -> Integer -> MonkArray
-shiftOne idx ms@(MonkArray monkeys) itm =
+shiftOne :: Integer -> Relief -> MonkArray -> Integer -> MonkArray
+shiftOne idx relief ms@(MonkArray monkeys) itm =
   let active = monkeys Array.! idx
-      worried = mworry (mOp active) itm 3
+      worried = mworry (mOp active) itm relief
       tested = mcheck (mTest active) worried
       toMonkey =
         if tested
@@ -152,26 +160,45 @@ shiftOne idx ms@(MonkArray monkeys) itm =
          " test is " ++ show tested ++ " so throws to " ++ show toMonkey) -}
    in MonkArray $ monkeys Array.// [(toMonkey, newToMonkey)]
 
-runMonkey :: MonkArray -> Integer -> MonkArray
-runMonkey ms@(MonkArray monkeys) idx =
+runMonkey :: Relief -> MonkArray -> Integer -> MonkArray
+runMonkey relief ms@(MonkArray monkeys) idx =
   let activeMonkey = monkeys Array.! idx
       toShift = items activeMonkey
       oldBusy = busy activeMonkey
-      MonkArray newMonkeys = foldl (shiftOne idx) ms toShift
+      MonkArray newMonkeys = foldl (shiftOne idx relief) ms toShift
       newActive =
         activeMonkey {items = [], busy = oldBusy + toInteger (length toShift)}
    in MonkArray $ newMonkeys Array.// [(idx, newActive)]
 
-runRound ms@(MonkArray monkeys) =
-  foldl runMonkey ms [0 .. toInteger $ length monkeys - 1]
+runRound relief ms@(MonkArray monkeys) =
+  foldl (runMonkey relief) ms [0 .. toInteger $ length monkeys - 1]
 
+part1 :: String -> IO Integer
 part1 fname = do
   monkeys <- readMonkeys <$> TIO.readFile fname
   let amonkeys =
         MonkArray $ Array.listArray (0, toInteger $ length monkeys - 1) monkeys
-  let finalMonkeys@(MonkArray fMonkeys) = iterate runRound amonkeys !! 20
-  mapM_ TIO.putStrLn $ monkeyState amonkeys
-  mapM_ TIO.putStrLn $ monkeyState finalMonkeys
+  let finalMonkeys@(MonkArray fMonkeys) = iterate (runRound DIV3) amonkeys !! 20
+  --mapM_ TIO.putStrLn $ monkeyState amonkeys
+  --mapM_ TIO.putStrLn $ monkeyState finalMonkeys
   let mbusiness = map busy $ Array.elems fMonkeys
-  mapM_ (TIO.putStrLn . T.pack . show) mbusiness
+  --mapM_ (TIO.putStrLn . T.pack . show) mbusiness
+  return $ product $ take 2 $ reverse $ sort mbusiness
+
+monkeyRelief (MonkArray ms) =
+  let divPart Monkey {mTest = MDivisible d} = d
+   in product $ map divPart $ Array.elems ms
+
+part2 :: String -> IO Integer
+part2 fname = do
+  monkeys <- readMonkeys <$> TIO.readFile fname
+  let amonkeys =
+        MonkArray $ Array.listArray (0, toInteger $ length monkeys - 1) monkeys
+  let relief = MODX $ monkeyRelief amonkeys
+  let finalMonkeys@(MonkArray fMonkeys) =
+        iterate (runRound relief) amonkeys !! 10000
+  --mapM_ TIO.putStrLn $ monkeyState amonkeys
+  --mapM_ TIO.putStrLn $ monkeyState finalMonkeys
+  let mbusiness = map busy $ Array.elems fMonkeys
+  --mapM_ (TIO.putStrLn . T.pack . show) mbusiness
   return $ product $ take 2 $ reverse $ sort mbusiness

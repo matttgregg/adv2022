@@ -6,6 +6,7 @@ import qualified Data.Text    as T
 import qualified Data.Text.IO as TIO
 import qualified Day1
 import qualified Day10
+import qualified Day11
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -18,6 +19,13 @@ import           Text.Printf
 
 runDay :: Int -> String -> (String -> IO Int) -> (String -> IO Int) -> IO ()
 runDay day file p1 p2 = do
+  part1 <- p1 file
+  part2 <- p2 file
+  printf "Day%d : %d, %d\n" day part1 part2
+
+runIDay ::
+     Int -> String -> (String -> IO Integer) -> (String -> IO Integer) -> IO ()
+runIDay day file p1 p2 = do
   part1 <- p1 file
   part2 <- p2 file
   printf "Day%d : %d, %d\n" day part1 part2
@@ -44,3 +52,4 @@ main = do
   printf $ "Day10 Part1:" <> show part10_1 <> "\n"
   TIO.putStrLn "Day10 Part2:"
   Day10.part2 "data/full/day10"
+  runIDay 11 "data/full/day11" Day11.part1 Day11.part2

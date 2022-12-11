@@ -50,7 +50,7 @@ printImage im = do
           (\px ->
              if px
                then "#"
-               else ".")
+               else " ")
           im
   let ls = map T.concat $ chunksOf 40 pxs
   mapM_ print ls
