@@ -12,6 +12,7 @@ import qualified Day5
 import qualified Day6
 import qualified Day7
 import qualified Day8
+import qualified Day9
 import qualified Text.Printf  as TIO
 import           Text.Printf
 
@@ -38,3 +39,4 @@ main = do
   runDay 6 "data/full/day6" Day6.part1 Day6.part2
   runDay 7 "data/full/day7" Day7.part1 Day7.part2
   runDay 8 "data/full/day8" Day8.part1 Day8.part2
+  runDay 9 "data/full/day9" Day9.part1 Day9.part2

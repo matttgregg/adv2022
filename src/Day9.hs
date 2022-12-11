@@ -15,27 +15,36 @@ newtype Pt =
 data Rope =
   Rope
     { hd      :: Pt
-    , tl      :: Pt
+    , knots   :: [Pt]
     , crossed :: Map.Map Pt ()
     }
   deriving (Show)
 
-newRope :: Rope
-newRope =
+newRope :: Int -> Rope
+newRope knotCount =
   Rope
-    {hd = Pt (0, 0), tl = Pt (0, 0), crossed = Map.fromList [(Pt (0, 0), ())]}
+    { hd = Pt (0, 0)
+    , knots = replicate knotCount $ Pt (0, 0)
+    , crossed = Map.fromList [(Pt (0, 0), ())]
+    }
 
 mvHead :: Rope -> Pt -> Rope
 mvHead rp@(Rope {hd = Pt (hdx, hdy)}) (Pt (mvx, mvy)) =
   rp {hd = Pt (hdx + mvx, hdy + mvy)}
 
 collapseRope :: Rope -> Rope
-collapseRope rp@Rope {hd = Pt (hdx, hdy), tl = Pt (tlx, tly)}
-  | hdx == tlx && abs (hdy - tly) > 1 = rp {tl = Pt (tlx, approach tly hdy)}
-  | hdy == tly && abs (hdx - tlx) > 1 = rp {tl = Pt (approach tlx hdx, tly)}
+collapseRope rp@Rope {hd = h, knots = ks} = rp {knots = newKnots}
+  where
+    newKnots = drop 1 $ reverse $ foldl doKnot [h] ks
+    doKnot hds k = collapseKnot (head hds) k : hds
+
+collapseKnot :: Pt -> Pt -> Pt
+collapseKnot (Pt (hdx, hdy)) tl@(Pt (tlx, tly))
+  | hdx == tlx && abs (hdy - tly) > 1 = Pt (tlx, approach tly hdy)
+  | hdy == tly && abs (hdx - tlx) > 1 = Pt (approach tlx hdx, tly)
   | abs (hdx - tlx) > 1 || abs (hdy - tly) > 1 =
-    rp {tl = Pt (approach tlx hdx, approach tly hdy)}
-  | otherwise = rp
+    Pt (approach tlx hdx, approach tly hdy)
+  | otherwise = tl
         -- appraoch shifts finds a value from the first value one step closer to the second
   where
     approach p1 p2
@@ -44,7 +53,8 @@ collapseRope rp@Rope {hd = Pt (hdx, hdy), tl = Pt (tlx, tly)}
       | otherwise = p1
 
 markRope :: Rope -> Rope
-markRope rp@Rope {tl = rTl, crossed = c} = rp {crossed = Map.insert rTl () c}
+markRope rp@Rope {knots = ks, crossed = c} =
+  rp {crossed = Map.insert (last ks) () c}
 
 runOnce :: Rope -> Char -> Rope
 runOnce rp 'R' = markRope $ collapseRope $ mvHead rp $ Pt (1, 0)
@@ -62,11 +72,17 @@ runLine rp l = runStep rp dir ct
     dir = T.head $ head ws
     ct = read $ T.unpack $ ws !! 1
 
-runFile :: String -> IO Int
-runFile f = do
+runFile :: Int -> String -> IO Int
+runFile kCount f = do
   contents <- TIO.readFile f
   let ls = T.lines contents
-  let rp = foldl runLine newRope ls
+  let rp = foldl runLine (newRope kCount) ls
   return $ covered rp
   where
     covered Rope {crossed = crs} = length $ Map.keys crs
+
+part1 :: String -> IO Int
+part1 = runFile 1
+
+part2 :: String -> IO Int
+part2 = runFile 9

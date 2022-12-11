@@ -109,3 +109,23 @@ On the other hand, despite relying on a lot of list operations today, my solutio
 I still haven't writtent any tests, and I usually like to at least validate against the test data. Now that I'm more comfortable with the core language, it feels like an achievable aim for the weekend.
 
 ## Day 9
+
+I feel like I'm finally getting into the swing of things here. The initial implementation
+went in quite neatly - except that my code locked solid when I ran it on actual data.
+
+Putting some debug in, I could see that I was processing every line, but then getting stuck
+when trying to export the result. I realised this was probably laziness biting me - I was
+building up quite a big lazy list, and then asking it to collapse at the end. I initially, vainly,
+tried to fix by using `Text.IO` (i.e. non-lazy) but predictably this had no effect.
+Looking a bit deeper, it looked like a a prime bottle neck would be me calling `nub` on every move - this 
+is me trying to avoid duplicates in my 'visited locations' list. But, this is running on a list, so
+cost O(n) in the length of the list, and as that grows to a few thousand... A quick fix was
+changing to just doing one `nub` call at the end. This gave the right answer and was fast enough. 
+Then I shifted to using a `Map` rather than a list - and back to pretty instantaneous operations.
+
+The second part - I was initially worried/prepared for a bit of a refactoring slog as it 
+required a significantly different architecture pattern. *However* it turned out to be a
+relatively straight forward refactor and I accomplished it first time without errors. This
+was an area I felt the Haskell type system helping me. As I refactored, the type system 
+helped guide the right way to rewrite the functions. Very nice, well done Haskell.
+
