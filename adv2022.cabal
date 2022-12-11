@@ -57,7 +57,8 @@ library
         Day5,
         Day6,
         Day7,
-        Day8
+        Day8,
+        Day9
 
     -- Modules included in this library but not exported.
     -- other-modules:
