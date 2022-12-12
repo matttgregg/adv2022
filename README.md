@@ -166,3 +166,18 @@ this sort of problem. A couple of shout outs to nice things that I've noticed:
  * Switching between types hasn't been as painful as I at first thought. As long as you keep things straight in your head, the explicit conversions are fairly natural.
  * GHC seems fairly efficient. I mention because today I could see that running my solution today in GHCI was noticably slower than in GHC. But, that's still ~a second vs ~100ms in ghc. Although the code that I wrote wasn't that efficient, it's still well within practical requirements without heavy tweaks. I have previously worried about Haskell performance without extreme tuning, but in practice it hasn't been that difficult. Sensible and idiomatic choices seem to get you a long way.
 
+ ## Day 12
+
+ It's not AoC without some pathfinding, and today we reach it. It's a pleasantly non-contrived
+ version, with the constraints on gradient ascent being quite natural. And it naturally lends to
+ some quite pretty algorithms.
+
+ The second part is interesting. If you've implemented the first part 'fast enough' then the second
+ part can be handled relatively naively. That's what I did, and I hit solutions in under 2 seconds. On the other hand, it's likely that there's a whole number of fairly cool code improvements that could be done. Particularly avoiding going back to ground level, and probably
+ storing information between runs. 
+
+ But otherwise, pretty nice. Haskell still behaving itself - I didn't need to worry 
+ excessively about performance and things are still working quite happily. Again, the 
+ interactive environment is very handy to work with. It allowed me to catch myself doing
+ diagonal moves in my iniitial implementation today.
+
