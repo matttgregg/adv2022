@@ -45,7 +45,12 @@ readHeights ls =
           newHeights = Map.insert (Pt col row) (height' c) oheights
        in ForestMap {heights = newHeights, startPt = newStart, endPt = newEnd}
 
-neighbours ar o@(Pt x y) ForestMap {heights = hs} =
+data NbrMode
+  = NbrsUp
+  | NbrsDown
+  deriving (Eq, Show)
+
+neighbours nbrMode o@(Pt x y) ForestMap {heights = hs} =
   let maybeNbrs = [Pt (x + dx) (y + dy) | dx <- [-1, 0, 1], dy <- [-1, 0, 1]]
    in filter canMove maybeNbrs
   where
@@ -58,20 +63,23 @@ neighbours ar o@(Pt x y) ForestMap {heights = hs} =
       | Map.notMember nbr hs = False
     canMove nbr =
       let nbrHeight = Map.findWithDefault 0 nbr hs
-       in cHeight - nbrHeight >= -1 && (ar || nbrHeight > 0)
+       in if nbrMode == NbrsUp
+            then cHeight - nbrHeight >= -1
+            else nbrHeight - cHeight >= -1
 
 data PathMap =
   PathMap
-    { forest      :: ForestMap
-    , distances   :: Map.Map Pt Int
-    , working     :: [Pt]
-    , newWorking  :: [Pt]
-    , dist        :: Int
-    , allowReturn :: Bool
+    { forest     :: ForestMap
+    , distances  :: Map.Map Pt Int
+    , working    :: [Pt]
+    , newWorking :: [Pt]
+    , dist       :: Int
+    , nbrMode    :: NbrMode
+    , terminated :: Bool
     }
   deriving (Show)
 
-initPathMap ar fm@ForestMap {startPt = s} =
+initPathMap nr fm@ForestMap {startPt = s} =
   let distances = Map.insert s 0 Map.empty
    in PathMap
         { forest = fm
@@ -79,22 +87,33 @@ initPathMap ar fm@ForestMap {startPt = s} =
         , working = [s]
         , newWorking = []
         , dist = 0
-        , allowReturn = ar
+        , nbrMode = nr
+        , terminated = False
         }
 
 -- Do a single step from a pt w
-doStepFrom pm@PathMap { forest = f
+doStepFrom pm@PathMap { forest = f@ForestMap {heights = hs, endPt = ep}
                       , distances = ds
                       , dist = d
                       , newWorking = nw
-                      , allowReturn = ar
+                      , nbrMode = nr
+                      , terminated = oldTerminated
                       } w =
-  let nbrs = neighbours ar w f
+  let nbrs = neighbours nr w f
       newPts = filter (`Map.notMember` ds) nbrs -- These are pts that we haven't already visited
+      newHeights = map (\p -> Map.findWithDefault 1 p hs) newPts
       newDistances = foldl (addDistance $ d + 1) ds newPts
       addDistance dist distances newPt =
         Map.insertWith (\_new old -> old) newPt dist distances
-   in pm {distances = newDistances, newWorking = nw <> newPts}
+      newTerminated =
+        if nr == NbrsUp
+          then ep `elem` newPts
+          else 0 `elem` newHeights
+   in pm
+        { distances = newDistances
+        , newWorking = nw <> newPts
+        , terminated = oldTerminated || newTerminated
+        }
 
 doStep pm@PathMap {working = ws} =
   let newPm = foldl doStepFrom pm ws
@@ -107,11 +126,10 @@ distToEnd PathMap {forest = ForestMap {endPt = ep}, distances = ds} =
 -- Note that we also terminate if we run out of moves.
 foundEnd pm = distToEnd pm >= 0 || null (working pm)
 
-fastestPath ar forest =
-  let pmap = initPathMap ar forest
+fastestPath nrm forest =
+  let pmap = initPathMap nrm forest
       paths = iterate doStep pmap
-      solved = dropWhile (not . foundEnd) paths
-   in distToEnd $ head solved
+   in length $ takeWhile (not . terminated) paths
 
 startingPts ForestMap {heights = hs} =
   filter (\pt -> 0 == Map.findWithDefault 0 pt hs) $ Map.keys hs
@@ -123,11 +141,11 @@ startingForests fm =
 part1 fname = do
   file <- readFile fname
   let forest = readHeights $ lines file
-  return $ fastestPath True forest
+  return $ fastestPath NbrsUp forest
+
+flipForest f@ForestMap {endPt = ep, startPt = sp} = f {endPt = sp, startPt = ep}
 
 part2 fname = do
   file <- readFile fname
-  let forest = readHeights $ lines file
-  let trials = startingForests forest
-  let _ = trace ("Checking " <> show (length trials) <> " starting points.") ()
-  return $ minimum (filter (> 0) $ map (fastestPath False) trials)
+  let forest = flipForest $ readHeights $ lines file
+  return $ fastestPath NbrsDown forest

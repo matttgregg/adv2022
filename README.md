@@ -181,3 +181,14 @@ this sort of problem. A couple of shout outs to nice things that I've noticed:
  interactive environment is very handy to work with. It allowed me to catch myself doing
  diagonal moves in my iniitial implementation today.
 
+
+ **Edit** I realised that we could do the second part a lot more quickly by reversing the
+ path, and starting at the end, terminating on the first zero level point. Implementing
+ I'm now back under one second for my complete solution. Refactoring to push through more
+ information (in this case a path finding mode), tends to be where the API starts to get messy.
+ It's too tempting to put more information in the same objects, and lose the focus on the 
+ meaning of the objects.
+
+ I also did some nice refactoring to use type classes in my day reporting functions - I no longer
+ have different functions for each of the day return types.
+
