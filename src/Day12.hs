@@ -79,12 +79,15 @@ data PathMap =
     }
   deriving (Show)
 
-initPathMap nr fm@ForestMap {startPt = s} =
+initPathMap nr fm@ForestMap {startPt = s, endPt = e} =
   let distances = Map.insert s 0 Map.empty
    in PathMap
         { forest = fm
         , distances = distances
-        , working = [s]
+        , working =
+            if nr == NbrsUp
+              then [s]
+              else [e]
         , newWorking = []
         , dist = 0
         , nbrMode = nr
@@ -119,33 +122,17 @@ doStep pm@PathMap {working = ws} =
   let newPm = foldl doStepFrom pm ws
    in newPm {working = newWorking newPm, newWorking = [], dist = 1 + dist newPm}
 
-distToEnd :: PathMap -> Int
-distToEnd PathMap {forest = ForestMap {endPt = ep}, distances = ds} =
-  Map.findWithDefault (-1) ep ds
-
--- Note that we also terminate if we run out of moves.
-foundEnd pm = distToEnd pm >= 0 || null (working pm)
-
 fastestPath nrm forest =
   let pmap = initPathMap nrm forest
       paths = iterate doStep pmap
    in length $ takeWhile (not . terminated) paths
-
-startingPts ForestMap {heights = hs} =
-  filter (\pt -> 0 == Map.findWithDefault 0 pt hs) $ Map.keys hs
-
-startingForests fm =
-  let starts = startingPts fm
-   in map (\s -> fm {startPt = s}) starts
 
 part1 fname = do
   file <- readFile fname
   let forest = readHeights $ lines file
   return $ fastestPath NbrsUp forest
 
-flipForest f@ForestMap {endPt = ep, startPt = sp} = f {endPt = sp, startPt = ep}
-
 part2 fname = do
   file <- readFile fname
-  let forest = flipForest $ readHeights $ lines file
+  let forest = readHeights $ lines file
   return $ fastestPath NbrsDown forest

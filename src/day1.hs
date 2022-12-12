@@ -19,14 +19,11 @@ myMax vals = max' vals 0
 part1 :: String -> IO Int
 part1 = (findMaxCalories <$>) . readFile
   where
-    findMaxCalories =
-      myMax . map sum . map (map read) . splitWhen ((== 0) . length) . lines
+    findMaxCalories = myMax . map (sum . map read) . splitWhen null . lines
 
 -- Part2 Solution.
 part2 :: String -> IO Int
 part2 = (findMaxThree <$>) . readFile
   where
     findMaxThree =
-      sum .
-      take 3 .
-      reverse . map sum . map (map read) . splitWhen ((== 0) . length) . lines
+      sum . take 3 . reverse . map (sum . map read) . splitWhen null . lines
