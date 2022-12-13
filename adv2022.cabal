@@ -61,7 +61,8 @@ library
         Day9,
         Day10,
         Day11,
-        Day12
+        Day12, 
+        Day13
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -81,7 +82,8 @@ library
         array,
         bytestring,
         mtl,
-        containers
+        containers,
+        attoparsec
 
     -- Directories containing source files.
     hs-source-dirs:   src

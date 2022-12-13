@@ -192,3 +192,15 @@ this sort of problem. A couple of shout outs to nice things that I've noticed:
  I also did some nice refactoring to use type classes in my day reporting functions - I no longer
  have different functions for each of the day return types.
 
+## Day 13
+
+Just nice, nice, nice all round. The ordering logic factors nicely down as a recursive function, 
+and then the remaining pieces (part one and part two) all come together nicely with the 
+standard library.
+
+The main legwork for today involved writing the parser. I took the opportunity to use
+`attoparsec` (I could find slightly more documentation), and went through the documentation
+a bit more carefully. Generally feeling a bit happier with it than when I bludgeoned
+through my basic `megaparsec` parser earlier in the month.
+
+Performance isn't an issue today, it's just a 'do things right' problem.
