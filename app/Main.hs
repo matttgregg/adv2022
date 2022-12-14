@@ -9,6 +9,7 @@ import qualified Day10
 import qualified Day11
 import qualified Day12
 import qualified Day13
+import qualified Day14
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -50,3 +51,4 @@ main = do
   runDay 11 "data/full/day11" Day11.part1 Day11.part2
   runDay 12 "data/full/day12" Day12.part1 Day12.part2
   runDay 13 "data/full/day13" Day13.part1 Day13.part2
+  runDay 14 "data/full/day14" Day14.part1 Day14.part2
