@@ -11,7 +11,9 @@ import           Data.Sort            (sort)
 import qualified Data.Text            as T
 import qualified Data.Text.IO         as TIO
 
-import           Data.Attoparsec.Text
+import           Codec.Picture
+
+import           Data.Attoparsec.Text (char, decimal, parseOnly, sepBy, string)
 
 data SpaceFill
   = Rock
@@ -66,11 +68,12 @@ initRockFace segs =
   let initMap = mapAllSegments segs
       pts = Map.keys initMap
       xs = map (\(SpPoint x y) -> x) pts
-      minX = minimum xs
-      maxX = maximum xs
       ys = 0 : map (\(SpPoint x y) -> y) pts
-      minY = minimum ys
+      minY = min (minimum ys) 0
       maxY = maximum ys
+      height = maxY - minY + 5
+      minX = min (minimum xs) (500 - height)
+      maxX = max (maximum xs) (500 + height)
    in RockFace
         { rockMap = initMap
         , minBounds = SpPoint minX minY
@@ -94,7 +97,7 @@ dropSand withFloor rf@RockFace { rockMap = rm
         (not withFloor || py <= maxY + 1) &&
         EmptySpace == Map.findWithDefault EmptySpace pt rm
       (newSand, newState, newRm) =
-        if (not withFloor) && (sY >= maxY || sX < minX || sX > maxX)
+        if not withFloor && (sY >= maxY || sX < minX || sX > maxX)
           then (oSand, Escaped, rm)
           else if emptyAboveFloor newDown
                  then (newDown, Falling, rm)
@@ -125,6 +128,28 @@ printRockFace RockFace { rockMap = rm
           charFor Sand       = 'o'
        in charFor rockAt
 
+imageFromRockFace scale RockFace { rockMap = rm
+                                 , minBounds = SpPoint minX minY
+                                 , maxBounds = SpPoint maxX maxY
+                                 , sand = SpPoint sx sy
+                                 } =
+  let pixelForSpace Sand       = PixelRGB8 214 218 123
+      pixelForSpace Rock       = PixelRGB8 120 120 120
+      pixelForSpace EmptySpace = PixelRGB8 0 0 0
+      pixelForPt x y
+        | sx == ((x `div` scale) + minX) && sy == ((y `div` scale) + minY) =
+          PixelRGB8 225 225 225
+      pixelForPt x y =
+        pixelForSpace $
+        Map.findWithDefault
+          EmptySpace
+          (SpPoint ((x `div` scale) + minX) ((y `div` scale) + minY))
+          rm
+   in generateImage
+        pixelForPt
+        (scale * (1 + maxX - minX))
+        (scale * (4 + maxY - minY))
+
 countSand RockFace {rockMap = rm} = length $ filter (== Sand) $ Map.elems rm
 
 part1 fname = do
@@ -145,3 +170,19 @@ part2 fname = do
         head $ dropWhile ((== Falling) . rockState) $ iterate (dropSand True) rf
   --mapM_ TIO.putStrLn $ printRockFace lastSand
   return $ countSand lastSand
+
+visSand scale fname writeTo withFloor skipSize = do
+  ls <- T.lines <$> TIO.readFile fname
+  let segments = rights $ map (parseOnly pSegments) ls
+  let rf = initRockFace segments
+  let pOptions = PaletteOptions MedianMeanCut False 8
+  let (sandImage, sandPalette) = palettize pOptions $ imageFromRockFace scale rf
+  let framesSand =
+        takeWhile ((== Falling) . rockState) $ iterate (dropSand withFloor) rf
+  --mapM_ TIO.putStrLn $ printRockFace lastSand
+  let imagesSand =
+        map (imageFromRockFace scale . head) (chunksOf skipSize framesSand)
+  reportRight $ writeGifAnimation writeTo 1 LoopingForever imagesSand
+  where
+    reportRight (Right x)  = x
+    reportRight (Left err) = print err

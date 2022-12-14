@@ -204,3 +204,24 @@ a bit more carefully. Generally feeling a bit happier with it than when I bludge
 through my basic `megaparsec` parser earlier in the month.
 
 Performance isn't an issue today, it's just a 'do things right' problem.
+
+## Day 14
+
+Roll on the visualisations! These type of 'physics' simulations are always fun, and
+it's always interesting to see how much interest comes out of fairly simple rules.
+
+As for the work, it's a matter of do the parsing (easy now I'm comfortable with `attoparsec`)
+describe the simulation state cleanly, and then define iteration and termination steps
+cleanly.
+
+Again, I am impressed by how easily Haskell lets me express these various parts, and does
+a good job at doing something efficient. Today, my fairly naive implementation takes
+around a second to run. Absolutely, I think I'd easily get down towards milliseconds in 
+rust, but it doesn't feel like playing to Haskell's strengths to spend a vast amount of
+time squeezing performance here (or at least, not what I wanted to get out of AoC at the
+moment). So, I've left it at that - fast enough, but not blazingly fast.
+
+Today, I finally started doing serious work on visualisation. Using the juicy pixels library
+I generated some fairly interesting (although obvious) animated gifs of the sand fall. They
+took a lot of time to generate (minutes), but it's a good tool to have available, and I
+hope to be able to do some more interesting things in future.

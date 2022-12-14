@@ -52,3 +52,13 @@ main = do
   runDay 12 "data/full/day12" Day12.part1 Day12.part2
   runDay 13 "data/full/day13" Day13.part1 Day13.part2
   runDay 14 "data/full/day14" Day14.part1 Day14.part2
+  {- Visualising Day14. This is slooooow. (i.e. Tens of minutes) - }
+  TIO.putStrLn "Visualizing Test, Part 1"
+  Day14.visSand 8 "data/test/day14" "out_t1.gif" False 10
+  TIO.putStrLn "Visualizing Test, Part 2"
+  Day14.visSand 8 "data/test/day14" "out_t2.gif" True 10
+  TIO.putStrLn "Visualizing Full, Part 1"
+  Day14.visSand 2 "data/full/day14" "out_f1.gif" False 100
+  TIO.putStrLn "Visualizing Full, Part 2"
+  Day14.visSand 2 "data/full/day14" "out_f2.gif" True 4000
+  { - -}
