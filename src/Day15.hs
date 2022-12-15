@@ -5,7 +5,7 @@ module Day15 where
 import           Data.Either          (rights)
 import           Data.List            (nub)
 import qualified Data.Map             as Map
-import           Data.Maybe           (catMaybes, isNothing, mapMaybe)
+import           Data.Maybe           (catMaybes, fromJust, isNothing, mapMaybe)
 import           Data.Sort            (sort)
 import qualified Data.Text            as T
 import qualified Data.Text.IO         as TIO
@@ -97,7 +97,7 @@ gapOn minX maxX intervals =
       -- We've gone past the end
         | nc >= maxX = a {counted = maxX + 1}
       -- We have an overlap or adjacent
-        | nx <= (nc + 1) = a {nextClose = max nc ny}
+        | nx <= nc + 1 = a {nextClose = max nc ny}
       -- We have a gap!
         | otherwise = a {counted = nc + 1}
       AccInterval {counted = c} = foldl accStep acc sorted
@@ -119,7 +119,7 @@ part1 checkLine fname = do
   let _ = trace (show intervals) ()
   return $ coveredByCount intervals - beaconsOn checkLine sensors
 
-part2 maxSize fname = do
+slowPart2 maxSize fname = do
   ls <- T.lines <$> TIO.readFile fname
   let sensors = rights $ map (parseOnly pSensor) ls
   let intervalsOn row = mapMaybe (intervalOn row) sensors
@@ -132,6 +132,175 @@ part2 maxSize fname = do
   --_ <- trace (show $ catMaybes lineGaps) $ return ()
   let gapY = fromIntegral $ length $ takeWhile isNothing lineGaps
   let Just gapX = head $ dropWhile isNothing lineGaps
-  --_ <- trace ("Found a gap at " <> show gapX <> "," <> show gapY) $ return ()
+  --print ("Found a gap at " <> show gapX <> "," <> show gapY)
   --print $ "Sensors : " <> show (head sensors)
+  return $ gapX * 4000000 + gapY
+
+-- A Line Segment with fomula y = (+/-)x + dx, x in [minX, maxX]
+data LineSeg =
+  LineSeg
+    { xRange   :: Interval
+    , dx       :: Integer
+    , positive :: Bool
+    }
+  deriving (Show, Eq)
+
+--   0 1 2 3 4 5 6
+-- 0 . . . . . . .
+-- 1 . . . . . . .
+-- 2 . . . o . . .
+-- 3 . . o # o . .
+-- 4 . o B S # o .
+-- 5 . . o # o . .
+-- 6 . . . o . . .
+-- 7 . . . . . . .
+--
+-- m = 1
+-- sx = 3, sy = 4
+-- NE = [3, 5], -1  + x
+-- NW = [1, 3], 5 - x
+-- SE = [3, 5], 9 - x
+-- SW = [1, 3], 3 + x
+-- For +ve seg : y = dx + x => dx = y - x, y = y0 + m
+-- For -ve seg : y = dx - x => dx = y + x
+-- y = dx1 + x
+-- y = dx2 + x
+segmentsForSensor Sensor {sensorPt = Spt sx sy, beaconPt = Spt bx by} =
+  let m = abs (sx - bx) + abs (sy - by)
+      neSeg =
+        LineSeg
+          { xRange = Interval sx (sx + m + 1)
+          , dx = (sy - m - 1) - sx
+          , positive = True
+          }
+      nwSeg =
+        LineSeg
+          { xRange = Interval (sx - m - 1) sx
+          , dx = (sy - m - 1) + sx
+          , positive = False
+          }
+      seSeg =
+        LineSeg
+          { xRange = Interval sx (sx + m + 1)
+          , dx = (sy + m + 1) + sx
+          , positive = False
+          }
+      swSeg =
+        LineSeg
+          { xRange = Interval (sx - m - 1) sx
+          , dx = (sy + m + 1) - sx
+          , positive = True
+          }
+   in [neSeg, nwSeg, seSeg, swSeg]
+
+intervalOverlap (Interval x0 y0) (Interval x1 y1)
+  | x1 < x0 = intervalOverlap (Interval x1 y1) (Interval x0 y0)
+  | x1 <= y0 = Just $ Interval x1 (min y0 y1)
+  | otherwise = Nothing
+
+intervalStart (Interval x0 _) = x0
+
+segPoint x LineSeg {xRange = xr0, dx = dx0, positive = p0}
+  | p0 = Spt x (x + dx0)
+  | otherwise = Spt x (-x + dx0)
+
+ySegRange l@LineSeg {xRange = Interval xFrom xTo, dx = dx0, positive = p0} =
+  let y0 = (yFromPt $ segPoint xFrom l)
+      y1 = (yFromPt $ segPoint xTo l)
+   in if y0 <= y1
+        then Interval (max y0 0) (min y1 4000000)
+        else Interval (max y1 0) (min y0 4000000)
+
+segmentOverlap l0@LineSeg {xRange = xr0, dx = dx0, positive = p0} l1@LineSeg { xRange = xr1
+                                                                             , dx = dx1
+                                                                             , positive = p1
+                                                                             }
+  | p0 /= p1 = Nothing
+  | l0 == l1 = Nothing
+  | otherwise =
+    let xOverlap = intervalOverlap xr0 xr1
+     in (if isNothing xOverlap || dx0 /= dx1
+           then Nothing
+           else Just l0 {xRange = fromJust xOverlap})
+
+isInInterval x (Interval x0 y0) = x >= x0 && x <= y0 || x >= y0 && x <= x0
+
+segmentCross l0@LineSeg {xRange = xr0, dx = dx0, positive = p0} l1@LineSeg { xRange = xr1
+                                                                           , dx = dx1
+                                                                           , positive = p1
+                                                                           }
+  | p0 == p1 = Nothing
+  | p1 = segmentCross l1 l0 -- Ensure p0 = true, p1 = false
+  | otherwise =
+    let doubleX = dx1 - dx0
+        x = doubleX `div` 2
+     in if odd doubleX
+          then Nothing
+          else if x `isInInterval` xr0 && x `isInInterval` xr1
+                 then Just $ Spt x (x + dx0)
+                 else Nothing
+
+-- y = x + x0, y = -x + x1 => 2x = x1 - x0
+yFromPt (Spt _ y) = y
+
+nudgesSensor (Spt x y) s@Sensor {sensorPt = Spt sx sy, beaconPt = Spt bx by} =
+  let m = abs (sx - bx) + abs (sy - by)
+      mToS = abs (sx - x) + abs (sy - y)
+   in if mToS - 1 == m
+        then Just s
+        else Nothing
+
+printSeg l0@LineSeg {xRange = Interval xFrom xTo, dx = dx0, positive = p0} =
+  if p0
+    then "[" <> show xFrom <> ", " <> show xTo <> "] := x + " <> show dx0
+    else "[" <> show xFrom <> ", " <> show xTo <> "] := -x + " <> show dx0
+
+debugPart2 fname = do
+  ls <- T.lines <$> TIO.readFile fname
+  let sensors = rights $ map (parseOnly pSensor) ls
+  let toCheck = Spt 2706598 3253551
+  print $ "Checking " <> show toCheck
+  let nudging = mapMaybe (nudgesSensor toCheck) sensors
+  print "All Edges::"
+  print nudging
+  let nudgingEdges = concatMap segmentsForSensor nudging
+  mapM_
+    (\l -> print $ printSeg l <> " -> " <> show (segPoint 2706598 l))
+    nudgingEdges
+  let overlaps =
+        catMaybes
+          [segmentOverlap s0 s1 | s0 <- nudgingEdges, s1 <- nudgingEdges]
+  print "Overlapping::"
+  mapM_ (print . printSeg) overlaps
+  let crossings =
+        catMaybes [segmentCross s0 s1 | s0 <- overlaps, s1 <- overlaps]
+  return crossings
+
+part2 maxSize fname = do
+  ls <- T.lines <$> TIO.readFile fname
+  let sensors = rights $ map (parseOnly pSensor) ls
+  let allSegments = concatMap segmentsForSensor sensors
+  let sharedSegments =
+        catMaybes [segmentOverlap s0 s1 | s0 <- allSegments, s1 <- allSegments]
+  --print $ sort $ map ySegRange sharedSegments
+  let overlaps =
+        catMaybes
+          [segmentCross s0 s1 | s0 <- sharedSegments, s1 <- sharedSegments]
+  let inRange (Spt x y) = x >= 0 && x <= maxSize && y >= 0 && y <= maxSize
+  let allowed = filter inRange overlaps
+  --print allowed
+  let candidateYs = nub $ map yFromPt allowed
+  --print $ sort candidateYs
+  let intervalsOn row = mapMaybe (intervalOn row) sensors
+  let tryRow y =
+        let res = gapOn 0 maxSize (intervalsOn y)
+         in if isNothing res
+              then Nothing
+              else Just (y, fromJust res)
+  let lineGaps = mapMaybe tryRow candidateYs
+  --print $ sort lineGaps
+  let gapY = fst $ head lineGaps
+  let gapX = snd $ head lineGaps
+  -- Looking for: "Found a gap at 2706598,3253551"
+  --_ <- trace ("Found a gap at " <> show gapX <> "," <> show gapY) $ return ()
   return $ gapX * 4000000 + gapY

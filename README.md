@@ -259,3 +259,16 @@ occur somewhere where two borders run paralell with a single channel between the
 it must be on the intersection of two such. It feels like it may be fairly easy to find
 something like that quickly as the number of scanners is quite small. (Assuming my 
 quick and messy reasoning is correct.)
+
+*Updated* : I came back for a faster solution, and it was using the logic described above. And it
+does work well (and extremely fast), but I did waste a lot of time tracking down a bug. It came
+down to mixing up the sensor y coord, and the beacon y coord, at one point when working out
+the manhattan distance reached by a single sensor. Ended up running through some reverse
+engineering to check my logic by working out which sensors my solution bordered, and then
+looking at the line equations I was generating - and seeing that they were incorrect. Once done,
+it's very satisfying, and takes negligible time.
+
+Incidentally, I always quickly tried running a parallel solution in Haskell, but was 
+unable to make any improvement at all. It's entirely possible I'm misusing the libraries. There
+are a few good texts on high performance Haskell, so I shall likely be looking into those
+when advent is over.
