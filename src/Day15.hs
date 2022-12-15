@@ -132,6 +132,6 @@ part2 maxSize fname = do
   --_ <- trace (show $ catMaybes lineGaps) $ return ()
   let gapY = fromIntegral $ length $ takeWhile isNothing lineGaps
   let Just gapX = head $ dropWhile isNothing lineGaps
-  _ <- trace ("Found a gap at " <> show gapX <> "," <> show gapY) $ return ()
+  --_ <- trace ("Found a gap at " <> show gapX <> "," <> show gapY) $ return ()
   --print $ "Sensors : " <> show (head sensors)
   return $ gapX * 4000000 + gapY

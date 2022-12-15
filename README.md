@@ -225,3 +225,37 @@ Today, I finally started doing serious work on visualisation. Using the juicy pi
 I generated some fairly interesting (although obvious) animated gifs of the sand fall. They
 took a lot of time to generate (minutes), but it's a good tool to have available, and I
 hope to be able to do some more interesting things in future.
+
+*Note*: I do want to come back to this one with the optimisation of storing the entire sand
+path, rather than recalculating from the entry point every time.
+
+
+## Day 15
+
+Needles and haystacks today - find uncovered points in vast 2D fields.
+
+First up - I had a bug in my parser which failed to find negative numbers. `decimal`
+in _attoparsec_ doesn't include negative values. I needed `signed decimal`, lesson learned. There
+were a couple of things which clued me in - mainly that the solution (on the test data) that
+I found wasn't unique. After going through some of the examples by hand, I realised
+I was failing to parse some lines, and then worked out the solution.
+
+Also today was a classic: _I know this is going to be slow, but I'm going to do it at first anyway_ . Around working out the 'corvered' points on the line, I started by doing the
+super expensive approach of collecting all the points in a set. This worked, and got me to
+part 2, but it was slow, so I did what I should have started with which is just inspect 
+the intervals, and count the lengths, accounting for overlaps. This was, predictably, lightening
+fast, and the same approach gave me an extremely fast scan line operation for finding gaps. I
+was pleasantly surprised to find that, even scanning four million rows, this got me a 
+solution in about twenty seconds.
+
+Yet again I am impressed by Haskell's ability to generate fairly performant solutions with 
+minimal tuning. And again, if I was writing in rust and able to focus on bit twiddling
+I have no doubt I could get closer to a single second.
+
+There's certainly a smarter solution which I may play around with this evening. On reddit 
+someone pointed out that the 'gap' has to exist somewhere on the border of a scanners range.
+Further I am now thinking that, due to the exclusive use of diamond shapes, it must 
+occur somewhere where two borders run paralell with a single channel between them *and*
+it must be on the intersection of two such. It feels like it may be fairly easy to find
+something like that quickly as the number of scanners is quite small. (Assuming my 
+quick and messy reasoning is correct.)
